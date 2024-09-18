@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="my-4">แก้ไขห้อง</h2>
+<div class="card p-4">
+    <form method="POST" action="{{ url_for('edit_room', id=room.id) }}">
+        <div class="form-group">
+            <input type="text" class="form-control" name="room_name" value="{{ room.name }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Edit Customer</h1>
+<form method="POST">
+    <div class="form-group">
+        <label for="customer_name">Customer Name</label>
+        <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{ customer.name }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+<a href="{{ url_for('manage_customers') }}" class="btn btn-secondary mt-3">Back to Customers</a>
+{% endblock %}
