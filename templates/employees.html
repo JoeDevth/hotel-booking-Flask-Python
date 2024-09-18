@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="my-4">จัดการข้อมูลพนักงาน</h2>
+<div class="card p-4">
+    <form method="POST" action="{{ url_for('add_employee') }}">
+        <div class="form-group">
+            <input type="text" class="form-control" name="employee_name" placeholder="ใส่ชื่อพนักงาน" required>
+        </div>
+        <button type="submit" class="btn btn-primary">เพิ่มพนักงาน</button>
+    </form>
+</div>
+
+<h4 class="my-4">รายการพนักงาน</h4>
+<ul class="list-group">
+    {% for employee in employees %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ employee }}
+            <a href="{{ url_for('delete_employee', index=loop.index0) }}" class="btn btn-danger btn-sm">ลบข้อมูล</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}
