@@ -4,7 +4,6 @@
 <div class="card p-4">
     <form method="POST" action="{{ url_for('edit_employee', id=employee.id) }}">
         <div class="form-group">
-            <label for="employee_name">ชื่อพนักงาน:</label>
             <input type="text" class="form-control" name="employee_name" value="{{ employee.name }}" required>
         </div>
         <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
