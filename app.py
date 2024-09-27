@@ -1,10 +1,16 @@
 from flask import Flask, render_template, request, redirect, url_for
-from models import db, Room, Employee, Customer
+from models import db, Room, Employee, Customer, Booking
+from datetime import datetime
+from flask_migrate import Migrate
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hotel.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db.init_app(app)
+
+db.init_app(app)  # ใช้ db ที่นำเข้าจาก models.py
+migrate = Migrate(app, db)
+
 
 @app.before_request
 def create_tables():
@@ -116,6 +122,70 @@ def edit_customer(id):
             db.session.commit()
         return redirect(url_for('manage_customers'))
     return render_template('edit_customer.html', customer=customer)
+
+@app.route('/bookings')
+def manage_bookings():
+    rooms = Room.query.filter_by(is_booked=False).all()  # Show only available rooms
+    customers = Customer.query.all()  # Show all customers
+    bookings = Booking.query.all()
+    return render_template('bookings.html', rooms=rooms, customers=customers, bookings=bookings)
+
+# Route to add a booking
+@app.route('/add_booking', methods=['POST'])
+def add_booking():
+    
+    room_id = request.form.get('room_id')
+    customer_id = request.form.get('customer_id')
+    check_in_date = request.form.get('check_in_date')
+    check_out_date = request.form.get('check_out_date')
+
+    room = Room.query.get(room_id)
+    if room and not room.is_booked:
+        new_booking = Booking(
+            room_id=room_id,
+            customer_id=customer_id,
+            check_in_date=datetime.strptime(check_in_date, '%Y-%m-%d'),
+            check_out_date=datetime.strptime(check_out_date, '%Y-%m-%d')
+        )
+        room.is_booked = True  # Mark the room as booked
+        db.session.add(new_booking)
+        db.session.commit()
+    
+    return redirect(url_for('show_bookings'))
+
+# Route to delete a booking
+@app.route('/delete_booking/<int:id>', methods=['POST'])
+def delete_booking(id):
+    booking = Booking.query.get(id)
+    if booking:
+        room = Room.query.get(booking.room_id)
+        room.is_booked = False  # Mark room as available again
+        db.session.delete(booking)
+        db.session.commit()
+    
+    return redirect(url_for('manage_bookings'))
+
+@app.route('/edit_booking/<int:id>', methods=['GET', 'POST'])
+def edit_booking(id):
+    booking = Booking.query.get(id)
+    rooms = Room.query.filter_by(is_booked=False).all()  # Get only available rooms
+    customers = Customer.query.all()  # Get all customers
+
+    if request.method == 'POST':
+        booking.room_id = request.form.get('room_id')
+        booking.customer_id = request.form.get('customer_id')
+        booking.check_in_date = datetime.strptime(request.form.get('check_in_date'), '%Y-%m-%d')
+        booking.check_out_date = datetime.strptime(request.form.get('check_out_date'), '%Y-%m-%d')
+
+        db.session.commit()
+        return redirect(url_for('manage_bookings'))
+
+    return render_template('edit_booking.html', booking=booking, rooms=rooms, customers=customers)
+
+@app.route('/bookings')
+def show_bookings():
+    bookings = Booking.query.all()  # ดึงข้อมูลการจองจากฐานข้อมูล
+    return render_template('bookings.html', bookings=bookings)  # ส่งข้อมูลไปยังเทมเพลต
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5001, threaded=True, use_reloader=False)

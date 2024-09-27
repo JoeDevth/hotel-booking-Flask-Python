@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="my-4">จัดการข้อมูลการจองห้อง</h2>
+<div class="card p-4">
+    <form method="POST" action="{{ url_for('add_booking') }}">
+        <div class="form-group">
+            <input type="text" class="form-control" name="customer_name" placeholder="ใส่ชื่อลูกค้า" required>
+        </div>
+        <button type="submit" class="btn btn-primary">เพิ่มการจอง</button>
+    </form>
+</div>
+
+<h4 class="my-4">รายการการจองห้องพัก</h4>
+<ul class="list-group">
+    {% for booking in bookings %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ booking.customer.name }} จองห้อง {{ booking.room.name }} ({{ booking.check_in_date }} - {{ booking.check_out_date }})
+        <div>
+            <a href="{{ url_for('edit_booking', id=booking.id) }}" class="btn btn-warning btn-sm">แก้ไข</a>
+            <form method="POST" action="{{ url_for('delete_booking', id=booking.id) }}" style="display:inline;">
+                <button type="submit" class="btn btn-danger btn-sm">ยกเลิกการจอง</button>
+            </form>
+        </div>
+    </li>
+{% endfor %}
+</ul>
+{% endblock %}
+
